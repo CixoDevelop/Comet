@@ -118,16 +118,22 @@ comet_word_t comet_program_pop(comet_program_t *program) {
     return *program->pointer++;
 }
 
+/** \fn comet_program_get_position
+ * This return current position in program space.
+ * @*program Program container to get from
+ */
+size_t comet_program_get_position(comet_program_t *program) {
+    return (size_t) (program->pointer - program->space);
+}
+
 /** \fn comet_create_stack
  * This create and return new clean stack.
  */
 comet_stack_t comet_create_stack() {
-    comet_word_t *stack_space = malloc(0x00 * sizeof(comet_word_t));
-
     return (comet_stack_t) {
         0x00,
-        stack_space,
-        stack_space
+        0x00,
+        malloc(0x00 * sizeof(comet_word_t))
     };
 }
 
@@ -136,23 +142,19 @@ comet_stack_t comet_create_stack() {
  * @*stack Stack object to get from
  */
 comet_word_t comet_pop_stack(comet_stack_t *stack) {
-    if (stack->pointer > stack->space){
-        --stack->pointer;
-        --stack->size;
-
-        int position = stack->pointer - stack->space;
-
+    if (stack->size - COMET_ALLOC_STEP == stack->position) {
+        stack->size -= COMET_ALLOC_STEP;
         stack->space = realloc(
-            stack->space, 
+            stack->space,
             stack->size * sizeof(comet_word_t)
         );
-        
-        if (stack->space == NULL) return 0x00;
-
-        stack->pointer = stack->space + position;
     }
 
-    return *stack->pointer;
+
+    if (stack->size == 0x00) return 0x00;
+    if (stack->position > 0x00) --stack->position;
+
+    return stack->space[stack->position];
 }
 
 /** \fn comet_push_stack
@@ -161,21 +163,25 @@ comet_word_t comet_pop_stack(comet_stack_t *stack) {
  * @data Data to insert 
  */
 bool comet_push_stack(comet_stack_t *stack, comet_word_t data) {
-    *stack->pointer = data;
+    if (stack->size == stack->position) {
+        stack->size += COMET_ALLOC_STEP;
+        stack->space = realloc(
+            stack->space, 
+            stack->size * sizeof(comet_word_t)
+        );
 
-    ++stack->pointer;
-    ++stack->size;
+        if (stack->space == NULL) return false;
+    }
 
-    int position = stack->pointer - stack->space;
-
-    stack->space = realloc(
-        stack->space,
-        stack->size * sizeof(comet_word_t)
-    );
-
-    if (stack->space == NULL) return false;
-
-    stack->pointer = stack->space + position;
+    stack->space[stack->position] = data;
+    ++stack->position;
 
     return true;
 }
+
+comet_instance_t comet_create_instance(comet_program_t program) {
+    return (comet_instance_t) {
+        program, comet_create_stack(), comet_create_stack(), 0x00, 0x00, 0x00 
+    };
+}
+

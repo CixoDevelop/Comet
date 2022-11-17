@@ -1,6 +1,10 @@
 #ifndef COMET_MACHINE_H_INCLUDED
 #define COMET_MACHINE_H_INCLUDED
 
+#ifndef COMET_ALLOC_STEP
+#define COMET_ALLOC_STEP 16
+#endif
+
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -8,7 +12,7 @@
 /** \typedef comet_word_t
  * This is base item in comet instance.
  */
-typedef char comet_word_t;
+typedef unsigned char comet_word_t;
 
 /** \struct comet_stack_t
  * This struct store stack for comet instance.
@@ -19,8 +23,8 @@ typedef struct {
     size_t size;
 
     /* Store current position in stack */
-    comet_word_t *pointer;
-    
+    size_t position;
+
     /* Store pointer to stack space */
     comet_word_t *space;
 
@@ -115,6 +119,12 @@ bool comet_program_serial_pop(
  */
 comet_word_t comet_program_pop(comet_program_t *program);
 
+/** \fn comet_program_get_position
+ * This return curent position in program space.
+ * @*program Program container to get from
+ */
+size_t comet_program_get_position(comet_program_t *program);
+
 /** \fn comet_create_stack
  * This create and return new clean stack.
  */
@@ -135,7 +145,7 @@ bool comet_push_stack(comet_stack_t *stack, comet_word_t data);
 
 /** \fn comet_create_instance 
  * This create instance of comet virtual machine.
- * @program Program to run in instance
+ * @*program Program to run in instance
  */
 comet_instance_t comet_create_instance(comet_program_t program);
 

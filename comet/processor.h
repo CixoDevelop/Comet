@@ -28,3 +28,7 @@
 #define NAND 0x53
 #define NOR 0x54
 #define XOR 0x55
+
+#define EXIT 0xF0
+
+#define DSTP 0xFF

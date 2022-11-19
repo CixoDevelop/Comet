@@ -1,10 +1,10 @@
-shell = comet_shell.c
-shell_script = comet_runner
+shell = comet.c
+shell_script = comet
 
-comet_source = $(shell find comet/ -type f -name '*.c')
+comet_source = $(shell find comet_source/ -type f -name '*.c')
 comet_object = $(patsubst %.c, %.o, $(comet_source))
 
-tests_source = $(shell find tests/ -type f -name '*.c')
+tests_source = $(shell find comet_tests/ -type f -name '*.c')
 tests_script = $(patsubst %.c, %, $(tests_source))
 
 CC = gcc
